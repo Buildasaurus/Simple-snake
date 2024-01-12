@@ -1,11 +1,11 @@
 package com.snake.Controllers;
 
 import java.util.ArrayList;
-
+import java.util.Timer;
+import java.util.TimerTask;
 import com.snake.Model.GameModel;
 import com.snake.Model.Vector;
 import com.snake.Views.GameView;
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
@@ -16,17 +16,13 @@ public class GameController implements IController
     private GameModel model;
 
 
-    private AnimationTimer gameTimer;
+    private Timer gameTimer;
     private int[] playerProgress;
     private ArrayList<Integer> updateList;
 
-    private final long[] frameTimes = new long[100];
-    private int frameTimeIndex = 0;
-    private boolean arrayFilled = false;
+
 
     private boolean isGameOver = false;
-    private boolean isPaused = false;
-    private boolean isSaving = false;
 
     private int playerCount;
 
@@ -49,40 +45,27 @@ public class GameController implements IController
         playerProgress = new int[playerCount];
         updateList = new ArrayList<Integer>();
 
-        gameTimer = new AnimationTimer()
+        TimerTask timeLoop = new TimerTask()
         {
-            @Override
-            public void handle(long now)
+            public void run()
             {
-                if (!isGameOver)
-                {
-                    for (int i = 0; i < playerProgress.length; i++)
+                Platform.runLater(() -> {
+                    if (!isGameOver)
                     {
-                        playerProgress[i] += getSpeed(i);
-                        if (playerProgress[i] > 100)
-                        {
-                            updateList.add(i);
-                            playerProgress[i] = 0;
-                        }
+                        isGameOver = executeNextStep();
+
                     }
-                    if (!updateList.isEmpty())
-                    {
-                        isGameOver = executeNextStep(updateList);
-                        if (isGameOver)
-                        {
-                            stop();
-                        }
-                        updateList.clear();
-                    }
-                }
+                });
             }
         };
-        gameTimer.start();
+
+        gameTimer = new Timer();
+        gameTimer.scheduleAtFixedRate(timeLoop, 1000, 1000);
     }
 
-    public boolean executeNextStep(ArrayList<Integer> updateList)
+    public boolean executeNextStep()
     {
-        model.nextState(updateList);
+        model.nextState();
         if (model.gameOver())
         {
             System.out.printf("There are %d players alive.\n", model.getAlivePlayerCount());
@@ -107,9 +90,9 @@ public class GameController implements IController
      * @param player
      * @return
      */
-    public int getCurrentScore(int player)
+    public int getCurrentScore()
     {
-        return model.getSnakeLength(player);
+        return model.getSnakeLength();
     }
 
     public int getPlayerCount()
@@ -122,45 +105,46 @@ public class GameController implements IController
         switch (key.getCode())
         {
             case UP:
-                model.setDirection(new Vector(0, -1), 0);
+                model.setDirection(new Vector(0, -1));
                 break;
             case W:
-                model.setDirection(new Vector(0, -1), 1);
+                model.setDirection(new Vector(0, -1));
                 break;
             case DOWN:
-                model.setDirection(new Vector(0, 1), 0);
+                model.setDirection(new Vector(0, 1));
                 break;
             case S:
-                model.setDirection(new Vector(0, 1), 1);
+                model.setDirection(new Vector(0, 1));
                 break;
             case LEFT:
-                model.setDirection(new Vector(-1, 0), 0);
+                model.setDirection(new Vector(-1, 0));
                 break;
             case A:
-                model.setDirection(new Vector(-1, 0), 1);
+                model.setDirection(new Vector(-1, 0));
                 break;
             case RIGHT:
-                model.setDirection(new Vector(1, 0), 0);
+                model.setDirection(new Vector(1, 0));
                 break;
             case D:
-                model.setDirection(new Vector(1, 0), 1);
+                model.setDirection(new Vector(1, 0));
                 break;
             case J:
-                model.setDirection(new Vector(1, 0), 2);
+                model.setDirection(new Vector(1, 0));
                 break;
             case G:
-                model.setDirection(new Vector(-1, 0), 2);
+                model.setDirection(new Vector(-1, 0));
                 break;
             case Y:
-                model.setDirection(new Vector(0, -1), 2);
+                model.setDirection(new Vector(0, -1));
                 break;
             case H:
-                model.setDirection(new Vector(0, 1), 2);
+                model.setDirection(new Vector(0, 1));
                 break;
             default:
                 break;
         }
     }
+
     public GameModel getGameModel()
     {
         return model;

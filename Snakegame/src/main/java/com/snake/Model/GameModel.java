@@ -66,7 +66,7 @@ public class GameModel
 
         // save which tiles have been modified
         changedTiles.add(player.getHeadPosition());
-        changedTiles.add(player.getHeadPosition());
+        changedTiles.add(player.getNextHeadPosition());
         changedTiles.add(player.getTailPosition());
         changedTiles.add(player.getNextTailPosition());
 
@@ -87,7 +87,6 @@ public class GameModel
             }
         }
 
-        ArrayList<Fruit> fruitsToRespawn = new ArrayList<>();
 
 
         player.calculateNextFrame(willClear);
@@ -126,164 +125,42 @@ public class GameModel
     {
         System.out.println("free squares at gameover Called: " + freeSquares);
 
-        // Single player
-        if (players.length == 1)
+        if (freeSquares == -1)
         {
-            System.out.println(players[0].isAlive());
-            if (freeSquares == -1)
-            {
-                gameWon = players[0].isAlive();
-                return true;
-            }
-            return !players[0].isAlive();
+            gameWon = player.isAlive();
+            return true;
         }
-        // multiplayer
-        else if (players.length > 1)
-        {
-            if (getAlivePlayerCount() < 2 || freeSquares == -1)
-            {
-                gameWon = getAlivePlayerCount() > 0 && freeSquares == -1;
-                return true;
-            }
-            return false;
-        }
-
-        return true; // Neither multiplayer or singleplayer?? Should not happen
+        return !player.isAlive();
     }
 
-    /**
-     * Returns the text describing what player won.
-     *
-     * @return
-     */
-    public String getGameOverText()
-    {
-        if (gameOver())
-        {
-            if (gameWon)
-            {
-                return "You defeated snake!\nThere is no more space \nleft to spawn fruits.";
-            }
-            int playerID = getAlivePlayerID();
-            if (playerID == -1 && players.length > 1)
-            {
-                return "All the remaining players\ndied at the same time!";
-            }
-            else
-            {
-                return players.length == 1 ? "You lost" : "Player " + (playerID + 1) + " Won!";
-            }
-
-        }
-        return "Game is not over yet";
-    }
 
     public Tile[][] getBoard()
     {
         return board;
     }
 
-    /**
-     * Figures out what the ID of the player that is alive is. If there is more or less than one
-     * player alive, it returns -1
-     *
-     * @return The ID of the snake alive, from 0 to the playercount - 1.
-     */
-    public int getAlivePlayerID()
-    {
-        if (getAlivePlayerCount() == 1)
-        {
-            int playerID = -1;
-            for (Snake snake : players)
-            {
-                if (snake.isAlive())
-                {
-                    playerID = snake.playerNumber;
-                }
-            }
-            return playerID;
-        }
-        return -1;
 
-    }
 
     public double getSpeed(int playerIndex)
     {
-        return players[playerIndex].getSpeed();
+        return player.getSpeed();
     }
 
     public int getAlivePlayerCount()
     {
-        int alivePlayerCount = players.length;
-        for (Snake player : players)
-        {
-            if (!player.isAlive())
-            {
-                alivePlayerCount -= 1;
-            }
-        }
-
-        return alivePlayerCount;
+        return player.isAlive() ? 1 : 0;
     }
 
-    public int getSnakeLength(int player)
+    public int getSnakeLength()
     {
-        player = player % Settings.getGameSettings().getPlayerCount();
-        return players[player].getSnakeLength();
+        return player.getSnakeLength();
     }
 
     public int getPlayerCount()
     {
-        return players.length;
+        return 1;
     }
 
-    public GameState getGameState()
-    {
-        ArrayList<SnakeTile> snakeTiles = new ArrayList<>();
-        ArrayList<Apple> apples = new ArrayList<>();
-        ArrayList<Banana> bananas = new ArrayList<>();
-        ArrayList<Cherry> cherries = new ArrayList<>();
-        ArrayList<Wall> walls = new ArrayList<>();
 
-        for (int i = 0; i < board.length; i++)
-        {
-            for (int n = 0; n < board[i].length; n++)
-            {
-                if (board[i][n] != null)
-                {
-                    switch (board[i][n].tileType)
-                    {
-                        case Snakehead:
-                        case Snakebody:
-                        case Snaketail:
-                            board[i][n].position = new Vector(n, i);
-                            snakeTiles.add((SnakeTile) board[i][n]);
-                            break;
 
-                        case Apple:
-                            apples.add((Apple) board[i][n]);
-                            break;
-
-                        case Banana:
-                            bananas.add((Banana) board[i][n]);
-                            break;
-
-                        case Cherry:
-                            cherries.add((Cherry) board[i][n]);
-                            break;
-
-                        case Wall:
-                            board[i][n].position = new Vector(n, i);
-                            walls.add((Wall) board[i][n]);
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        return new GameState(snakeTiles, apples, bananas, cherries, walls, players);
-    }
 }

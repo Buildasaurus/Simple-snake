@@ -20,7 +20,6 @@ public class GameView extends GridPane
     int columnCount;
     int height;
     int width;
-    int extraVisionDepth;
     Node[][] nodes;
 
     /**
@@ -33,11 +32,10 @@ public class GameView extends GridPane
      */
     public GameView(int width, int height, Tile[][] board)
     {
-        this.extraVisionDepth = Settings.getGameSettings().getExtraVisionDepth();
         this.height = height;
         this.width = width;
-        this.rowCount = Settings.getGameSettings().getExtendedRowCount();
-        this.columnCount = Settings.getGameSettings().getExtendedColumnCount();
+        this.rowCount = Settings.getGameSettings().getRowCount();
+        this.columnCount = Settings.getGameSettings().getColumnCount();
         initialize(board);
     }
 
@@ -49,9 +47,6 @@ public class GameView extends GridPane
     public void initialize(Tile[][] board)
     {
         nodes = new Node[rowCount][columnCount];
-        Settings.getGameSettings().addExtraVisionListener(() -> {
-            toggleExtraVisionSquares(Settings.getGameSettings().getExtraVision());
-        });
         this.getColumnConstraints().clear();
         this.getRowConstraints().clear();
 
@@ -103,7 +98,7 @@ public class GameView extends GridPane
         {
             nodes[GridPane.getRowIndex(node)][GridPane.getColumnIndex(node)] = node;
             refreshPoint(new Vector(GridPane.getColumnIndex(node), GridPane.getRowIndex(node)),
-                    board, Settings.getGameSettings().getExtraVision());
+                    board);
 
         }
     }
@@ -111,12 +106,11 @@ public class GameView extends GridPane
     public void update(Tile[][] board, ArrayList<Vector> relevantPositions)
     {
         // This variable might change from frame to frame, so
-        boolean extraVision = Settings.getGameSettings().getExtraVision();
         if (board != null)
         {
             for (Vector position : relevantPositions)
             {
-                updatePoint(position, board, extraVision);
+                refreshPoint(position, board);
             }
         }
         else
@@ -127,30 +121,14 @@ public class GameView extends GridPane
     }
 
 
-    public void refreshPoint(Vector position, Tile[][] board, boolean extraVision)
+    public void refreshPoint(Vector position, Tile[][] board)
     {
         Pane pane = (Pane) nodes[position.y][position.x];
-        int row = getRowIndex(pane) - extraVisionDepth;
-        int column = getColumnIndex(pane) - extraVisionDepth;
+        int row = position.y;
+        int column = position.x;
 
 
-        // if is on edge, set visible to whether extravision is true. Also these squares are
-        // special
-        if (row < 0 || row > rowCount - 1 - extraVisionDepth * 2 || column < 0
-                || column > columnCount - 1 - extraVisionDepth * 2)
-        {
-            column = column < 0 ? columnCount - extraVisionDepth * 2 + column : column;
-            column = column > columnCount - 1 - extraVisionDepth * 2
-                    ? column - (columnCount - extraVisionDepth * 2)
-                    : column;
 
-            row = row < 0 ? rowCount - extraVisionDepth * 2 + row : row;
-            row = row > rowCount - 1 - extraVisionDepth * 2
-                    ? row - (rowCount - extraVisionDepth * 2)
-                    : row;
-            pane.setVisible(extraVision);
-            pane.setOpacity(0.6);
-        }
         Tile tile = board[row][column];
 
         pane.getChildren().clear();
@@ -164,105 +142,6 @@ public class GameView extends GridPane
             imageView.setPreserveRatio(true);
 
             pane.getChildren().add(imageView);
-        }
-    }
-
-    public void toggleExtraVisionSquares(boolean visible)
-    {
-        for (int row = 0; row < extraVisionDepth; row++)
-        {
-            for (int column = 0; column < columnCount; column++)
-            {
-                nodes[row][column].setVisible(visible);
-            }
-        }
-        for (int column = 0; column < extraVisionDepth; column++)
-        {
-            for (int row = 0; row < rowCount; row++)
-            {
-                nodes[row][column].setVisible(visible);
-            }
-        }
-        for (int column = columnCount - 1; column >= Settings.getGameSettings().getColumnCount()
-                + extraVisionDepth; column--)
-        {
-            for (int row = 0; row < rowCount; row++)
-            {
-                nodes[row][column].setVisible(visible);
-            }
-        }
-        for (int row = rowCount - 1; row >= Settings.getGameSettings().getRowCount()
-                + extraVisionDepth; row--)
-        {
-            for (int column = 0; column < columnCount; column++)
-            {
-                nodes[row][column].setVisible(visible);
-            }
-        }
-    }
-
-    public void updatePoint(Vector position, Tile[][] board, boolean extraVision)
-    {
-        Vector gridCoordinate = position.add(extraVisionDepth);
-        ArrayList<Vector> gridPositions = new ArrayList<Vector>();
-        gridPositions.add(gridCoordinate);
-
-        // if is on edge, Several panes should be refreshed, if extravision is true
-        if (position.x < extraVisionDepth)
-        {
-            gridPositions
-                    .add(new Vector(Settings.getGameSettings().getColumnCount() + gridCoordinate.x,
-                            gridCoordinate.y));
-        }
-        if (position.y < extraVisionDepth)
-        {
-            gridPositions.add(new Vector(gridCoordinate.x,
-                    Settings.getGameSettings().getRowCount() + gridCoordinate.y));
-            if (position.x < extraVisionDepth) // topleft corner.
-            {
-                gridPositions.add(
-                        new Vector(Settings.getGameSettings().getColumnCount() + gridCoordinate.x,
-                                gridCoordinate.y + Settings.getGameSettings().getRowCount()));
-            }
-            if (position.x >= Settings.getGameSettings().getColumnCount() - extraVisionDepth)// topright
-                                                                                             // corner
-            {
-                gridPositions.add(
-                        new Vector(gridCoordinate.x - Settings.getGameSettings().getColumnCount(),
-                                Settings.getGameSettings().getRowCount() + gridCoordinate.y));
-            }
-        }
-        if (position.y >= Settings.getGameSettings().getRowCount() - extraVisionDepth)
-        {
-            int convertedY = gridCoordinate.y - Settings.getGameSettings().getRowCount();
-            gridPositions.add(new Vector(gridCoordinate.x, convertedY));
-
-            if (position.x < extraVisionDepth) // buttomLeft corner.
-            {
-                gridPositions.add(
-                        new Vector(Settings.getGameSettings().getColumnCount() + gridCoordinate.x,
-                                convertedY));
-            }
-            if (position.x >= Settings.getGameSettings().getColumnCount() - extraVisionDepth)// buttomright
-                                                                                             // corner
-            {
-                gridPositions.add(
-                        new Vector(gridCoordinate.x - Settings.getGameSettings().getColumnCount(),
-                                convertedY));
-            }
-        }
-        if (position.x >= Settings.getGameSettings().getColumnCount() - extraVisionDepth)
-        {
-            gridPositions
-                    .add(new Vector(gridCoordinate.x - Settings.getGameSettings().getColumnCount(),
-                            gridCoordinate.y));
-
-        }
-
-
-        for (Vector vector : gridPositions)
-        {
-            refreshPoint(vector, board, extraVision);
         }
     }
 }
