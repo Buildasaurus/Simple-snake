@@ -3,10 +3,10 @@ package com.snake.Controllers;
 import java.util.ArrayList;
 
 import com.snake.Model.GameModel;
-import com.snake.Model.GameState;
 import com.snake.Model.Vector;
-import com.snake.Utils.Highscore;
 import com.snake.Views.GameView;
+import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
 
@@ -14,6 +14,22 @@ public class GameController implements IController
 {
     private GameView view;
     private GameModel model;
+
+
+    private AnimationTimer gameTimer;
+    private int[] playerProgress;
+    private ArrayList<Integer> updateList;
+
+    private final long[] frameTimes = new long[100];
+    private int frameTimeIndex = 0;
+    private boolean arrayFilled = false;
+
+    private boolean isGameOver = false;
+    private boolean isPaused = false;
+    private boolean isSaving = false;
+
+    private int playerCount;
+
 
     public Parent getView()
     {
@@ -26,15 +42,42 @@ public class GameController implements IController
         this.view = new GameView(width, height, model.getBoard());
 
         view.update(model.getBoard(), model.getChangedPositions());
-    }
 
-    public GameController(int width, int height, GameState gameState)
-    {
-        this.model = new GameModel(gameState);
-        this.view = new GameView(width, height, model.getBoard());
+        view.setOnKeyPressed(this::handleKeyPressed);
+        Platform.runLater(() -> view.requestFocus());
 
+        playerProgress = new int[playerCount];
+        updateList = new ArrayList<Integer>();
 
-        view.update(model.getBoard(), model.getChangedPositions());
+        gameTimer = new AnimationTimer()
+        {
+            @Override
+            public void handle(long now)
+            {
+                if (!isGameOver)
+                {
+                    for (int i = 0; i < playerProgress.length; i++)
+                    {
+                        playerProgress[i] += getSpeed(i);
+                        if (playerProgress[i] > 100)
+                        {
+                            updateList.add(i);
+                            playerProgress[i] = 0;
+                        }
+                    }
+                    if (!updateList.isEmpty())
+                    {
+                        isGameOver = executeNextStep(updateList);
+                        if (isGameOver)
+                        {
+                            stop();
+                        }
+                        updateList.clear();
+                    }
+                }
+            }
+        };
+        gameTimer.start();
     }
 
     public boolean executeNextStep(ArrayList<Integer> updateList)
@@ -42,8 +85,6 @@ public class GameController implements IController
         model.nextState(updateList);
         if (model.gameOver())
         {
-            Highscore.setHighscore(model.getSnakeLength(0));
-            Highscore.setHighscore(model.getSnakeLength(1));
             System.out.printf("There are %d players alive.\n", model.getAlivePlayerCount());
             return true;
         }
@@ -74,11 +115,6 @@ public class GameController implements IController
     public int getPlayerCount()
     {
         return model.getPlayerCount();
-    }
-
-    public GameState getGameState()
-    {
-        return model.getGameState();
     }
 
     public void handleKeyPressed(KeyEvent key)

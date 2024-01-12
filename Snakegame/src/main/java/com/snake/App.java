@@ -5,10 +5,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import com.snake.Controllers.GameController;
 import com.snake.Controllers.IController;
-import com.snake.Controllers.MenuController;
-import com.snake.Utils.Highscore;
-import com.snake.Utils.SaveHandler;
+
 
 /**
  * JavaFX App
@@ -21,12 +20,10 @@ public class App extends Application
     @Override
     public void start(Stage stage) throws IOException
     {
-        controller = new MenuController();
+        controller = new GameController(Settings.windowWidth, Settings.windowHeight);
         scene = new Scene(controller.getView(), Settings.windowWidth, Settings.windowHeight);
         stage.setScene(scene);
         stage.show();
-        System.out.println("Highscore at start of game is: " + Highscore.getHighscore());
-        SaveHandler.createDummySaves();
         stage.setResizable(false);
     }
 

@@ -4,8 +4,8 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import com.snake.App;
 import com.snake.Settings;
-import com.snake.Utils.LevelGenerator;
 import org.reflections.Reflections;
 
 public class GameModel
@@ -18,7 +18,7 @@ public class GameModel
 
     private int rowCount;
     private int columnCount;
-    private Snake[] players;
+    private Snake player;
     public int winner = -1;
     int freeSquares = 0;
 
@@ -32,99 +32,24 @@ public class GameModel
         this.rowCount = Settings.getGameSettings().getRowCount();
         this.columnCount = Settings.getGameSettings().getColumnCount();
         board = new Tile[rowCount][columnCount];
-        players = new Snake[Settings.getGameSettings().getPlayerCount()];
         Vector startSpawnPoint = new Vector(columnCount / 2, rowCount / 2 - (getPlayerCount() - 1));
 
         changedTiles = new ArrayList<>();
-        for (int i = 0; i < Settings.getGameSettings().getPlayerCount(); i++)
-        {
-            players[i] = new Snake(board, startSpawnPoint.add(0, i * 2),
-                    startSpawnPoint.add(-1, i * 2), new Vector(1, 0), i);
-            changedTiles.add(startSpawnPoint.add(0, i * 2));
-            changedTiles.add(startSpawnPoint.add(-1, i * 2));
-        }
+        player = new Snake(board, startSpawnPoint.add(0, 0), startSpawnPoint.add(-1, 0),
+                new Vector(1, 0), 0);
+        changedTiles.add(startSpawnPoint.add(0, 0));
+        changedTiles.add(startSpawnPoint.add(-1, 0));
 
 
-        LevelGenerator.generateLevel(board);
-        int fruitCount = 0;
-        // Nice StackOverflow code to dynamiccaly get all classes that extends fruit, and spawn them
-        // https://stackoverflow.com/questions/205573/at-runtime-find-all-classes-in-a-java-application-that-extend-a-base-class
-        System.out.println("Trying to find subclasses");
-        Reflections reflections = new Reflections("com.snake");
-        Set<Class<? extends Fruit>> classes =
-                reflections.getSubTypesOf(com.snake.Model.Fruit.class);
-        for (Class<? extends Fruit> aClass : classes)
+        Apple apple = new Apple();
+        while (board[apple.getPosition().y][apple.getPosition().x] != null)
         {
-            System.out.println("subclass: " + aClass.getName());
-            try
-            { // cursed code from
-              // https://stackoverflow.com/questions/5533702/instantiating-object-of-same-class-from-within-class-in-java
-                Constructor constructor = aClass.getConstructor();
-                Fruit piece = (Fruit) constructor.newInstance();
-                while (board[piece.getPosition().y][piece.getPosition().x] != null)
-                {
-                    piece.setRandomPosition();
-                }
-                changedTiles.add(piece.getPosition());
-                board[piece.getPosition().y][piece.getPosition().x] = piece;
-                fruitCount++;
-            }
-            catch (Exception e)
-            {
-                System.out.println("Your constructor stuff in gamemodel doesn't work...");
-                System.out.println(e);
-            }
-            freeSquares = rowCount * columnCount - LevelGenerator.wallCount - fruitCount
-                    - players.length * 2;
+            apple.setRandomPosition();
+        }
+        changedTiles.add(apple.getPosition());
+        board[apple.getPosition().y][apple.getPosition().x] = apple;
+        freeSquares = rowCount * columnCount - 1 - 2;
 
-        }
-
-
-        /*
-         * // level generation LevelGenerator.generateLevel(board); Apple apple = new Apple(); while
-         * (board[apple.getPosition().y][apple.getPosition().x] != null) {
-         * apple.setRandomPosition(); } changedTiles.add(apple.getPosition());
-         * board[apple.getPosition().y][apple.getPosition().x] = apple;
-         *
-         * Cherry cherry = new Cherry(); while
-         * (board[cherry.getPosition().y][cherry.getPosition().x] != null) {
-         * cherry.setRandomPosition(); } board[cherry.getPosition().y][cherry.getPosition().x] =
-         * cherry; changedTiles.add(cherry.getPosition());
-         */
-    }
-
-    public GameModel(GameState gameState)
-    {
-        this.rowCount = Settings.getGameSettings().getRowCount();
-        this.columnCount = Settings.getGameSettings().getColumnCount();
-
-        board = new Tile[rowCount][columnCount];
-        for (SnakeTile snakeTile : gameState.getSnakeTiles())
-        {
-            board[snakeTile.getPosition().y][snakeTile.getPosition().x] = snakeTile;
-        }
-        for (Apple apple : gameState.getApples())
-        {
-            board[apple.getPosition().y][apple.getPosition().x] = apple;
-        }
-        for (Banana banana : gameState.getBananas())
-        {
-            board[banana.getPosition().y][banana.getPosition().x] = banana;
-        }
-        for (Cherry cherry : gameState.getCherries())
-        {
-            board[cherry.getPosition().y][cherry.getPosition().x] = cherry;
-        }
-        for (Wall wall : gameState.getWalls())
-        {
-            board[wall.getPosition().y][wall.getPosition().x] = wall;
-        }
-
-        players = gameState.getPlayers();
-        for (Snake player : players)
-        {
-            player.setBoard(board);
-        }
     }
 
     ArrayList<Vector> changedTiles = new ArrayList<Vector>();
@@ -135,133 +60,54 @@ public class GameModel
      *
      * @param playersToUpdate
      */
-    public void nextState(ArrayList<Integer> playersToUpdate)
+    public void nextState()
     {
         changedTiles.clear();
-        // for syncronization, find any snakes colliding head on, and tell them they are colliding.
-        // These snakes won't update.
-        Snake[] snakesToUpdate = new Snake[playersToUpdate.size()];
-        int j = 0;
-        // Gather the correct pointers for later use
-        for (int playerID : playersToUpdate)
-        {
-            snakesToUpdate[j] = players[playerID];
-            j++;
-        }
-        ArrayList<Vector> headPositions = new ArrayList<>();
-        HashMap<String, Integer> nextHeadPositions = new HashMap<>();
-        for (int i = 0; i < playersToUpdate.size(); i++)
-        {
-            Vector nextPosition = snakesToUpdate[i].getNextHeadPosition();
-            headPositions.add(nextPosition);
-            if (nextHeadPositions.containsKey(nextPosition.toString()))
-            {
-                snakesToUpdate[nextHeadPositions.get(nextPosition.toString())].isColliding = true;
-                snakesToUpdate[i].isColliding = true;
-            }
-            else
-            {
-                nextHeadPositions.put(nextPosition.toString(), i);
-            }
-        }
+
         // save which tiles have been modified
-        changedTiles.addAll(headPositions);
-        for (Snake snake : snakesToUpdate)
-        {
-            changedTiles.add(snake.getHeadPosition());
-            changedTiles.add(snake.getTailPosition());
-            changedTiles.add(snake.getNextTailPosition());
-        }
+        changedTiles.add(player.getHeadPosition());
+        changedTiles.add(player.getHeadPosition());
+        changedTiles.add(player.getTailPosition());
+        changedTiles.add(player.getNextTailPosition());
 
         // Now we check whether the next position will be clear, in the next frame.
         // This the snakes won't know, as there might be a snake tail that disappears, or that
         // doesn't
         // disappear, if the snake eats an apple, or dies, or is colliding.
-        boolean[] willClear = new boolean[players.length];
-        int i = 0;
-        for (Vector vec : headPositions)
+        boolean willClear = true;
+        Vector vec = player.getNextHeadPosition();
+        // essentially looping through the playerss
+        Tile tile = board[vec.y][vec.x];
+        if (tile instanceof SnakeTile)
         {
-            willClear[i] = true;
-            // essentially looping through the playerss
-            Tile tile = board[vec.y][vec.x];
-            if (tile instanceof SnakeTile)
+            SnakeTile snakeTile = ((SnakeTile) tile);
+            if (!player.willGrow(board))
             {
-                SnakeTile snakeTile = ((SnakeTile) tile);
-                if (!(snakeTile.tileType == TileType.Snaketail)
-                        || (players[snakeTile.assignedPlayer].isColliding
-                                || players[snakeTile.assignedPlayer].willGrow(board))
-                        || !playersToUpdate.contains(snakeTile.assignedPlayer))
-                {
-                    System.out.println(
-                            snakeTile.tileType + " " + players[snakeTile.assignedPlayer].isColliding
-                                    + "  " + players[snakeTile.assignedPlayer].willGrow(board));
-                    willClear[i] = false;
-                }
+                willClear = false;
             }
-            i++;
         }
+
         ArrayList<Fruit> fruitsToRespawn = new ArrayList<>();
-        j = 0;
-        for (Snake snake : snakesToUpdate)
+
+
+        player.calculateNextFrame(willClear);
+        if (player.Fruiteaten() != null)
         {
-            if (snake.isAlive())
+            Apple apple = new Apple();
+            freeSquares--;
+
+            if (freeSquares < 0)
             {
-                snake.calculateNextFrame(willClear[j]);
-                if (snake.Fruiteaten() != null)
-                {
-                    fruitsToRespawn.add(snake.Fruiteaten());
-                    if (snake.Fruiteaten().tileType == TileType.Banana)
-                    {
-                        for (Snake player : players)
-                        {
-                            if (Settings.getGameSettings().getSpeed() < player.getSpeed())
-                            {
-                                player.setSpeed(player.getSpeed() - 1);
-                            }
-                        }
-                    }
-                }
+                return;
             }
-            else
+            while (board[apple.getPosition().y][apple.getPosition().x] != null)
             {
-                System.out.println(snake.playerNumber);
+                apple.setRandomPosition();
             }
-            j++;
+            changedTiles.add(apple.getPosition());
         }
-        for (Fruit fruit : fruitsToRespawn)
-        {
-            // TODO - fix this, so that when someone wins the game, it isn't an infinite loop,
-            // and when they are close, it doesn't take forever
 
-            try
-            { // cursed code from
-              // https://stackoverflow.com/questions/5533702/instantiating-object-of-same-class-from-within-class-in-java
-                Constructor constructor = fruit.getClass().getConstructor();
-                Fruit piece = (Fruit) constructor.newInstance();
-                if (fruit instanceof Apple)
-                {
-                    freeSquares--;
 
-                }
-                if (freeSquares < 0)
-                {
-                    break;
-                }
-
-                while (board[piece.getPosition().y][piece.getPosition().x] != null)
-                {
-                    piece.setRandomPosition();
-                }
-                changedTiles.add(piece.getPosition());
-                board[piece.getPosition().y][piece.getPosition().x] = piece;
-
-            }
-            catch (Exception e)
-            {
-                System.out.println("Your constructor stuff in gamemodel doesn't work...");
-                System.out.println(e);
-            }
-        }
     }
 
     public ArrayList<Vector> getChangedPositions()
@@ -269,10 +115,9 @@ public class GameModel
         return changedTiles;
     }
 
-    public void setDirection(Vector direction, int player)
+    public void setDirection(Vector direction)
     {
-        player = player % Settings.getGameSettings().getPlayerCount();
-        players[player].setDirection(direction);
+        player.setDirection(direction);
     }
 
     boolean gameWon = false;

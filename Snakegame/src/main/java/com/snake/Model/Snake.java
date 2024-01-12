@@ -76,10 +76,6 @@ public class Snake
             // overwrite it.
             updateSnakePosition();
         }
-        else if (tileAtHead instanceof Wall)
-        {
-            snakeIsAlive = false;
-        }
     }
 
     public void setDirection(Vector direction)
