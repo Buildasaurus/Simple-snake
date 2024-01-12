@@ -60,7 +60,7 @@ public class GameController implements IController
         };
 
         gameTimer = new Timer();
-        gameTimer.scheduleAtFixedRate(timeLoop, 1000, 1000);
+        gameTimer.scheduleAtFixedRate(timeLoop, 200, 200);
     }
 
     public boolean executeNextStep()

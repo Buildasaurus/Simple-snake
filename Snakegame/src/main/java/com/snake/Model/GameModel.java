@@ -80,10 +80,11 @@ public class GameModel
         Tile tile = board[vec.y][vec.x];
         if (tile instanceof SnakeTile)
         {
+            willClear = false;
             SnakeTile snakeTile = ((SnakeTile) tile);
-            if (!player.willGrow(board))
+            if (!player.willGrow(board) && snakeTile.tileType == TileType.Snaketail)
             {
-                willClear = false;
+                willClear = true;
             }
         }
 
@@ -103,6 +104,7 @@ public class GameModel
             {
                 apple.setRandomPosition();
             }
+            board[apple.getPosition().y][apple.getPosition().x] = apple;
             changedTiles.add(apple.getPosition());
         }
 
