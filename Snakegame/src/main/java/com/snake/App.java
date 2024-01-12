@@ -41,9 +41,12 @@ public class App extends Application
             int width = Integer.parseInt(args[0]);
             int height = Integer.parseInt(args[1]);
             int max = Math.max(width, height);
-            int boxSize = maxDimension/max;
-            Settings.windowHeight = boxSize*height;
-            Settings.windowWidth = boxSize*width;
+            int boxSize = maxDimension / max;
+            Settings.windowHeight = boxSize * height;
+            System.out.println(Settings.windowHeight);
+            System.out.println(height);
+
+            Settings.windowWidth = boxSize * width;
             Settings.getGameSettings().setColumnCount(width);
             Settings.getGameSettings().setRowCount(height);
         }

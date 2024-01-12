@@ -125,8 +125,6 @@ public class GameModel
 
     public boolean gameOver()
     {
-        System.out.println("free squares at gameover Called: " + freeSquares);
-
         if (freeSquares == -1)
         {
             gameWon = player.isAlive();
