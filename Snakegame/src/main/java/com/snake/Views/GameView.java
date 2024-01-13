@@ -62,9 +62,9 @@ public class GameView extends GridPane
         }
 
         BackgroundFill bgFillDark =
-                new BackgroundFill(new Color(0, 0.6, 0.1, 1), null, getInsets());
+                new BackgroundFill(new Color(0.73, 0.73, 0.23, 1), null, getInsets());
         BackgroundFill bgFillLight =
-                new BackgroundFill(new Color(0, 0.5, 0.1, 1), null, getInsets());
+                new BackgroundFill(new Color(0.73, 0.73, 0.23, 1), null, getInsets());
         Background bgDark = new Background(bgFillDark);
         Background bgLight = new Background(bgFillLight);
         boolean isLastDark = false;
