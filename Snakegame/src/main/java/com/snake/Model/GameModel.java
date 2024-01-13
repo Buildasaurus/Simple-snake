@@ -1,12 +1,7 @@
 package com.snake.Model;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import com.snake.App;
 import com.snake.Settings;
-import org.reflections.Reflections;
 
 public class GameModel
 {
@@ -119,6 +114,11 @@ public class GameModel
     public void setDirection(Vector direction)
     {
         player.setDirection(direction);
+    }
+
+    public Vector getDirection()
+    {
+        return player.getDirection();
     }
 
     boolean gameWon = false;

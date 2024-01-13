@@ -15,11 +15,6 @@ public class GameController implements IController
     private GameView view;
     private GameModel model;
 
-    private boolean isGameOver = false;
-
-    private int playerCount;
-
-
     public Parent getView()
     {
         return view;
@@ -75,48 +70,33 @@ public class GameController implements IController
 
     public void handleKeyPressed(KeyEvent key)
     {
+        Vector direction = new Vector();
         switch (key.getCode())
         {
             case UP:
-                model.setDirection(new Vector(0, -1));
-                break;
             case W:
-                model.setDirection(new Vector(0, -1));
+                direction = new Vector(0, -1);
                 break;
             case DOWN:
-                model.setDirection(new Vector(0, 1));
-                break;
             case S:
-                model.setDirection(new Vector(0, 1));
+                direction = new Vector(0, 1);
                 break;
             case LEFT:
-                model.setDirection(new Vector(-1, 0));
-                break;
             case A:
-                model.setDirection(new Vector(-1, 0));
+                direction = new Vector(-1, 0);
                 break;
             case RIGHT:
-                model.setDirection(new Vector(1, 0));
-                break;
             case D:
-                model.setDirection(new Vector(1, 0));
-                break;
-            case J:
-                model.setDirection(new Vector(1, 0));
-                break;
-            case G:
-                model.setDirection(new Vector(-1, 0));
-                break;
-            case Y:
-                model.setDirection(new Vector(0, -1));
-                break;
-            case H:
-                model.setDirection(new Vector(0, 1));
+                direction = new Vector(1, 0);
                 break;
             default:
                 break;
         }
-        executeNextStep();
+        if(!model.getDirection().equals(direction.multiply(-1)))
+        {
+            model.setDirection(direction);
+            executeNextStep();
+        }
     }
 
     public GameModel getGameModel()
