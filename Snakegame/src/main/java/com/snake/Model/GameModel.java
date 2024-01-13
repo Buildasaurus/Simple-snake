@@ -35,8 +35,8 @@ public class GameModel
         Vector startSpawnPoint = new Vector(columnCount / 2, rowCount / 2 - (getPlayerCount() - 1));
 
         changedTiles = new ArrayList<>();
-        player = new Snake(board, startSpawnPoint.add(0, 0), startSpawnPoint.add(-1, 0),
-                new Vector(1, 0), 0);
+        player = new Snake(board, startSpawnPoint.add(0, 0), startSpawnPoint.add(1, 0),
+                new Vector(-1, 0), 0);
         changedTiles.add(startSpawnPoint.add(0, 0));
         changedTiles.add(startSpawnPoint.add(-1, 0));
 
