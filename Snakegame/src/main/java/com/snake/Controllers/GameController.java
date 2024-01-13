@@ -15,13 +15,6 @@ public class GameController implements IController
     private GameView view;
     private GameModel model;
 
-
-    private Timer gameTimer;
-    private int[] playerProgress;
-    private ArrayList<Integer> updateList;
-
-
-
     private boolean isGameOver = false;
 
     private int playerCount;
@@ -41,26 +34,6 @@ public class GameController implements IController
 
         view.setOnKeyPressed(this::handleKeyPressed);
         Platform.runLater(() -> view.requestFocus());
-
-        playerProgress = new int[playerCount];
-        updateList = new ArrayList<Integer>();
-
-        TimerTask timeLoop = new TimerTask()
-        {
-            public void run()
-            {
-                Platform.runLater(() -> {
-                    if (!isGameOver)
-                    {
-                        isGameOver = executeNextStep();
-
-                    }
-                });
-            }
-        };
-
-        gameTimer = new Timer();
-        gameTimer.scheduleAtFixedRate(timeLoop, 200, 200);
     }
 
     public boolean executeNextStep()
@@ -143,6 +116,7 @@ public class GameController implements IController
             default:
                 break;
         }
+        executeNextStep();
     }
 
     public GameModel getGameModel()
