@@ -10,6 +10,8 @@ import com.snake.Settings;
 
 import javafx.scene.image.Image;
 
+// Made by everyone
+
 public class Resources
 {
     // TODO, write static code to get an image, by a string
@@ -34,11 +36,12 @@ public class Resources
         return map.get(name);
     }
 
-    public static Image getImageByNamesetWidth(String name, double scaler){
+    public static Image getImageByNamesetWidth(String name, double scaler)
+    {
         if (!map.containsKey(name))
         {
             URL url = Resources.class.getResource("/com/snake/Graphics/" + name + ".png");
-            Image image = new Image(url.toString(), Settings.windowWidth/scaler, 0, true, false);
+            Image image = new Image(url.toString(), Settings.windowWidth / scaler, 0, true, false);
             map.put(name, image);
         }
         return map.get(name);

@@ -1,5 +1,8 @@
 package com.snake.Model;
 
+// Made by Kajsa Berlstedt & Lucia Little
+
+
 public class Apple extends Fruit
 {
     public Apple()

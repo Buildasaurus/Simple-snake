@@ -10,7 +10,8 @@ import com.snake.Controllers.IController;
 
 
 /**
- * JavaFX App
+ * Simple snake - Made by Kajsa Berlstedt & Lucia Little & Marinus Juhl & Jonathan Sommerlund
+ *
  */
 public class App extends Application
 {

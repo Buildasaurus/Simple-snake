@@ -2,6 +2,7 @@ package com.snake.Model;
 
 import java.util.ArrayList;
 import com.snake.Settings;
+// Made by Kajsa Berlstedt & Lucia Little & Jonathan Sommerlund
 
 public class GameModel
 {

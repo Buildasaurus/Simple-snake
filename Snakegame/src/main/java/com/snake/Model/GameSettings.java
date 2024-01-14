@@ -1,7 +1,6 @@
 package com.snake.Model;
 
-import java.util.ArrayList;
-import java.util.List;
+// Made by everyone
 
 public class GameSettings
 {

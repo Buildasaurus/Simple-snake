@@ -10,6 +10,8 @@ import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
 
+// Made by Marinus Juhl
+
 public class GameController implements IController
 {
     private GameView view;
@@ -92,7 +94,7 @@ public class GameController implements IController
             default:
                 break;
         }
-        if(!model.getDirection().equals(direction.multiply(-1)))
+        if (!model.getDirection().equals(direction.multiply(-1)))
         {
             model.setDirection(direction);
             executeNextStep();

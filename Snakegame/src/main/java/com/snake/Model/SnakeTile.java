@@ -1,7 +1,8 @@
 package com.snake.Model;
 
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
+
+// Made by Jonathan Sommerlund
 
 public class SnakeTile extends Tile
 {

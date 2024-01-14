@@ -4,6 +4,7 @@ import java.util.Random;
 import com.snake.Settings;
 
 import javafx.scene.image.ImageView;
+// Made by Kajsa Berlstedt & Lucia Little
 
 public abstract class Fruit extends Tile
 {

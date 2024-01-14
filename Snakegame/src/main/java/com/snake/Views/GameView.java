@@ -14,6 +14,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 
+// Made by Jonathan Sommerlund
+
 public class GameView extends GridPane
 {
     int rowCount;
