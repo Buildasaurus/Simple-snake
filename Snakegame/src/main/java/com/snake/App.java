@@ -16,7 +16,7 @@ import com.snake.Controllers.IController;
 public class App extends Application
 {
     private static Scene scene;
-    static int maxDimension = 700;
+    static int maxDimension = 600;
     private static IController controller;
 
     @Override
@@ -42,12 +42,12 @@ public class App extends Application
             int width = Integer.parseInt(args[0]);
             int height = Integer.parseInt(args[1]);
             int max = Math.max(width, height);
-            int boxSize = maxDimension / max;
+            int boxSize = (int)Math.floor(((double)maxDimension) / max);
             Settings.windowHeight = boxSize * height;
             System.out.println(Settings.windowHeight);
-            System.out.println(height);
 
             Settings.windowWidth = boxSize * width;
+
             Settings.getGameSettings().setColumnCount(width);
             Settings.getGameSettings().setRowCount(height);
         }
